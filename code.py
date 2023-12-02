@@ -1,7 +1,7 @@
 import pygame
 import sys
 import random
-import math 
+import math
 
 # Инициализация Pygame
 pygame.init()
@@ -10,6 +10,7 @@ pygame.init()
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 
 # Размеры экрана
 WIDTH, HEIGHT = 600, 400
@@ -19,7 +20,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Змейка")
 
 # Шрифт для текста
-font = pygame.font.Font(None, 36)
+font = pygame.font.SysFont('monospace', 36)
+
 
 # Класс для змейки
 class Snake:
@@ -29,7 +31,7 @@ class Snake:
             ((WIDTH // 2), (HEIGHT // 2) + i * GRIDSIZE) for i in range(self.size)
         ]
         self.direction = UP  # Изначальное направление вверх
-        self.color = RED
+        self.color = WHITE
 
     def get_head_position(self):
         return self.positions[0]
@@ -53,11 +55,12 @@ class Snake:
             if i == 0:  # Голова змейки
                 head_radius = GRIDSIZE // 2
                 head_center = (p[0] + head_radius, p[1] + head_radius)
-    
+
                 # Создание повернутой головы
                 pygame.draw.circle(surface, self.color, head_center, head_radius)
                 tail_radius = GRIDSIZE // 2
-                tail_direction = (self.positions[1][0] - self.positions[0][0], self.positions[1][1] - self.positions[0][1])
+                tail_direction = (
+                self.positions[1][0] - self.positions[0][0], self.positions[1][1] - self.positions[0][1])
                 tail_offset = (GRIDSIZE // 2)
                 if tail_direction == (GRIDSIZE, 0):  # Движется влево
                     pygame.draw.rect(surface, self.color, [
@@ -79,10 +82,11 @@ class Snake:
                         (p[0], p[1]),
                         (GRIDSIZE, tail_radius),
                     ])
-                
+
             elif i == len(self.positions) - 1:  # Хвост змейки
                 tail_radius = GRIDSIZE // 2
-                tail_direction = (self.positions[-1][0] - self.positions[-2][0], self.positions[-1][1] - self.positions[-2][1])
+                tail_direction = (
+                self.positions[-1][0] - self.positions[-2][0], self.positions[-1][1] - self.positions[-2][1])
                 tail_offset = (GRIDSIZE // 2)
                 if tail_direction == (GRIDSIZE, 0):  # Движется влево
                     pygame.draw.polygon(surface, self.color, [
@@ -138,15 +142,16 @@ class Snake:
 class Food:
     def __init__(self):
         self.position = (0, 0)
-        self.color = WHITE
+        self.color = GREEN
         self.randomize_position()
 
     def randomize_position(self):
-        self.position = (random.randint(0, (WIDTH // GRIDSIZE)-1) * GRIDSIZE,
-                         random.randint(0, (HEIGHT // GRIDSIZE)-1) * GRIDSIZE)
+        self.position = (random.randint(0, (WIDTH // GRIDSIZE) - 1) * GRIDSIZE,
+                         random.randint(0, (HEIGHT // GRIDSIZE) - 1) * GRIDSIZE)
 
     def render(self, surface):
         pygame.draw.rect(surface, self.color, (self.position[0], self.position[1], GRIDSIZE, GRIDSIZE))
+
 
 # Отрисовка текста
 def draw_text(surface, text, pos, color=WHITE):
@@ -165,6 +170,7 @@ def draw_text(surface, text, pos, color=WHITE):
             x += word_width + space
         x = pos[0]
         y += word_height
+
 
 # Функция для выбора уровня
 def choose_level():
@@ -195,6 +201,7 @@ def choose_level():
                 elif event.key == pygame.K_RETURN:
                     return selected_level
 
+
 # Основной игровой цикл
 def main():
     clock = pygame.time.Clock()
@@ -222,10 +229,10 @@ def main():
 
             # Проверка столкновения с краем экрана
             if (
-                snake.get_head_position()[0] == 0 and snake.positions[1][0] == WIDTH - 20
-                or snake.get_head_position()[0] == WIDTH - 20 and  snake.positions[1][0] == 0
-                or snake.get_head_position()[1] == 0 and snake.positions[1][1] == HEIGHT - 20
-                or snake.get_head_position()[1] == HEIGHT - 20 and snake.positions[1][1] == 0
+                    snake.get_head_position()[0] == 0 and snake.positions[1][0] == WIDTH - 20
+                    or snake.get_head_position()[0] == WIDTH - 20 and snake.positions[1][0] == 0
+                    or snake.get_head_position()[1] == 0 and snake.positions[1][1] == HEIGHT - 20
+                    or snake.get_head_position()[1] == HEIGHT - 20 and snake.positions[1][1] == 0
             ):
                 game_over(score)
                 return
@@ -234,7 +241,10 @@ def main():
             snake.render(screen)
             food.render(screen)
 
-            # Выводим количество очков на экран
+            # Выводим количество очков на экран, рисуем кнопку паузы и границы
+            pygame.draw.rect(screen, RED, (0, 0, 600, 400), 2)
+            pygame.draw.rect(screen, WHITE, (570, 5, 5, 25))
+            pygame.draw.rect(screen, WHITE, (583, 5, 5, 25))
             draw_text(screen, f"Очки: {score}", (10, 10), WHITE)
 
             pygame.display.flip()
@@ -248,7 +258,6 @@ def main():
         score = 0
         while True:
             handle_events(snake)
-
             snake.update()
 
             if snake.get_head_position() == food.position:
@@ -265,12 +274,15 @@ def main():
             snake.render(screen)
             food.render(screen)
 
-            # Выводим количество очков на экран
+            # Выводим количество очков на экран, рисуем кнопку паузы
+            pygame.draw.rect(screen, WHITE, (570, 5, 5, 25))
+            pygame.draw.rect(screen, WHITE, (583, 5, 5, 25))
             draw_text(screen, f"Очки: {score}", (10, 10), WHITE)
 
             pygame.display.flip()
 
             clock.tick(5)
+
 
 # Функции для обработки событий
 def handle_events(snake):
@@ -287,7 +299,8 @@ def handle_events(snake):
                 snake.direction = LEFT
             elif event.key == pygame.K_RIGHT:
                 snake.direction = RIGHT
-                
+
+
 # Функция для вывода сообщения об окончании игры и возврата в главное меню
 def game_over(score):
     waiting = True
