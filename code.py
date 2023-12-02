@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import math 
 
 # Инициализация Pygame
 pygame.init()
@@ -48,8 +49,90 @@ class Snake:
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
 
     def render(self, surface):
-        for p in self.positions:
-            pygame.draw.rect(surface, self.color, (p[0], p[1], GRIDSIZE, GRIDSIZE))
+        for i, p in enumerate(self.positions):
+            if i == 0:  # Голова змейки
+                head_radius = GRIDSIZE // 2
+                head_center = (p[0] + head_radius, p[1] + head_radius)
+    
+                # Создание повернутой головы
+                pygame.draw.circle(surface, self.color, head_center, head_radius)
+                tail_radius = GRIDSIZE // 2
+                tail_direction = (self.positions[1][0] - self.positions[0][0], self.positions[1][1] - self.positions[0][1])
+                tail_offset = (GRIDSIZE // 2)
+                if tail_direction == (GRIDSIZE, 0):  # Движется влево
+                    pygame.draw.rect(surface, self.color, [
+                        (p[0] + tail_radius, p[1]),
+                        (tail_radius, GRIDSIZE),
+                    ])
+                elif tail_direction == (-GRIDSIZE, 0):  # Движется вправо
+                    pygame.draw.rect(surface, self.color, [
+                        (p[0], p[1]),
+                        (tail_radius, GRIDSIZE),
+                    ])
+                elif tail_direction == (0, GRIDSIZE):  # Движется вверх
+                    pygame.draw.rect(surface, self.color, [
+                        (p[0], p[1] + tail_radius),
+                        (GRIDSIZE, tail_radius),
+                    ])
+                elif tail_direction == (0, -GRIDSIZE):  # Движется вниз
+                    pygame.draw.rect(surface, self.color, [
+                        (p[0], p[1]),
+                        (GRIDSIZE, tail_radius),
+                    ])
+                
+            elif i == len(self.positions) - 1:  # Хвост змейки
+                tail_radius = GRIDSIZE // 2
+                tail_direction = (self.positions[-1][0] - self.positions[-2][0], self.positions[-1][1] - self.positions[-2][1])
+                tail_offset = (GRIDSIZE // 2)
+                if tail_direction == (GRIDSIZE, 0):  # Движется влево
+                    pygame.draw.polygon(surface, self.color, [
+                        (p[0], p[1]),
+                        (p[0], p[1] + GRIDSIZE - 1),
+                        (p[0] + tail_radius, p[1] + tail_radius - 1)
+                    ])
+                elif tail_direction == (-GRIDSIZE, 0):  # Движется вправо
+                    pygame.draw.polygon(surface, self.color, [
+                        (p[0] + GRIDSIZE, p[1]),
+                        (p[0] + GRIDSIZE, p[1] + GRIDSIZE - 1),
+                        (p[0] + tail_radius, p[1] + tail_radius - 1)
+                    ])
+                elif tail_direction == (0, GRIDSIZE):  # Движется вверх
+                    pygame.draw.polygon(surface, self.color, [
+                        (p[0], p[1]),
+                        (p[0] + 2 * tail_radius - 1, p[1]),
+                        (p[0] + tail_radius, p[1] + tail_radius)
+                    ])
+                elif tail_direction == (0, -GRIDSIZE):  # Движется вниз
+                    pygame.draw.polygon(surface, self.color, [
+                        (p[0], p[1] + GRIDSIZE),
+                        (p[0] + 2 * tail_radius - 1, p[1] + GRIDSIZE),
+                        (p[0] + tail_radius, p[1] + tail_radius)
+                    ])
+            else:  # Тело змейки
+                pygame.draw.rect(surface, self.color, (p[0], p[1], GRIDSIZE, GRIDSIZE))
+
+    def get_head_angle(self):
+        x, y = self.direction
+        if x == 1:
+            return 0
+        elif x == -1:
+            return 180
+        elif y == 1:
+            return 90
+        elif y == -1:
+            return -90
+        return 0
+
+    def get_tail_angle(self):
+        dx = self.positions[-1][0] - self.positions[-2][0]
+        dy = self.positions[-1][1] - self.positions[-2][1]
+        return math.degrees(math.atan2(dy, dx))
+
+    def get_body_angle(self, index):
+        dx = self.positions[index + 1][0] - self.positions[index - 1][0]
+        dy = self.positions[index + 1][1] - self.positions[index - 1][1]
+        return math.degrees(math.atan2(dy, dx))
+
 
 # Класс для еды
 class Food:
