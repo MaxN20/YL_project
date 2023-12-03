@@ -15,6 +15,12 @@ GREEN = (0, 255, 0)
 # Размеры экрана
 WIDTH, HEIGHT = 600, 400
 
+GRIDSIZE = 20
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
+
 # Инициализация окна
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Змейка")
@@ -323,13 +329,6 @@ def game_over(score):
 
     pygame.event.clear()  # Очищаем все события после выхода из цикла
     main()
-
-
-GRIDSIZE = 20
-UP = (0, -1)
-DOWN = (0, 1)
-LEFT = (-1, 0)
-RIGHT = (1, 0)
 
 if __name__ == "__main__":
     main()
