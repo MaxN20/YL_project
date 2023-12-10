@@ -210,6 +210,9 @@ def choose_level():
 
 # Основной игровой цикл
 def main():
+    global game_flag
+    global snake_minus    
+    game_flag = 1
     clock = pygame.time.Clock()
 
     selected_level = choose_level()
@@ -220,91 +223,117 @@ def main():
         food = Food()
         score = 0
         while True:
-            handle_events(snake)
-            snake.update()
-
-            if snake.get_head_position() == food.position:
-                snake.size += 1
-                food.randomize_position()
-                score += 1
-
-            # Проверка столкновения головы змейки с телом
-            if snake.get_head_position() in snake.positions[1:]:
-                game_over(score)
-                return
-
-            # Проверка столкновения с краем экрана
-            if (
-                    snake.get_head_position()[0] == 0 and snake.positions[1][0] == WIDTH - 20
-                    or snake.get_head_position()[0] == WIDTH - 20 and snake.positions[1][0] == 0
-                    or snake.get_head_position()[1] == 0 and snake.positions[1][1] == HEIGHT - 20
-                    or snake.get_head_position()[1] == HEIGHT - 20 and snake.positions[1][1] == 0
-            ):
-                game_over(score)
-                return
-
-            screen.fill(BLACK)
-            snake.render(screen)
-            food.render(screen)
-
-            # Выводим количество очков на экран, рисуем кнопку паузы и границы
-            pygame.draw.rect(screen, RED, (0, 0, 600, 400), 2)
-            pygame.draw.rect(screen, WHITE, (570, 5, 5, 25))
-            pygame.draw.rect(screen, WHITE, (583, 5, 5, 25))
-            draw_text(screen, f"Очки: {score}", (10, 10), WHITE)
-
-            pygame.display.flip()
-
-            clock.tick(5)
-
+            handle_events(snake)            
+            if game_flag == 1:
+                snake.update()
+    
+                if snake.get_head_position() == food.position:
+                    snake.size += 1
+                    food.randomize_position()
+                    score += 1
+    
+                # Проверка столкновения головы змейки с телом
+                if snake.get_head_position() in snake.positions[1:]:
+                    game_over(score)
+                    return
+    
+                # Проверка столкновения с краем экрана
+                if (
+                        snake.get_head_position()[0] == 0 and snake.positions[1][0] == WIDTH - 20
+                        or snake.get_head_position()[0] == WIDTH - 20 and snake.positions[1][0] == 0
+                        or snake.get_head_position()[1] == 0 and snake.positions[1][1] == HEIGHT - 20
+                        or snake.get_head_position()[1] == HEIGHT - 20 and snake.positions[1][1] == 0
+                ):
+                    game_over(score)
+                    return
+    
+                screen.fill(BLACK)
+                snake.render(screen)
+                food.render(screen)
+    
+                # Выводим количество очков на экран, рисуем кнопку паузы и границы
+                pygame.draw.rect(screen, RED, (0, 0, 600, 400), 2)
+                pygame.draw.rect(screen, WHITE, (570, 5, 5, 25))
+                pygame.draw.rect(screen, WHITE, (583, 5, 5, 25))
+                draw_text(screen, f"Очки: {score}", (10, 10), WHITE)
+    
+                pygame.display.flip()
+    
+                clock.tick(5)
+            else:
+                if snake_minus == 1:
+                    print(snake.positions)
+                    snake.positions.pop(0)
+                    snake.positions.pop(0)
+                    snake_minus = 0
     elif selected_level == 1:
         # Уровень 2
         snake = Snake()
         food = Food()
         score = 0
         while True:
-            handle_events(snake)
-            snake.update()
-
-            if snake.get_head_position() == food.position:
-                snake.size += 1
-                food.randomize_position()
-                score += 1
-
-            # Проверка столкновения головы змейки с телом
-            if snake.get_head_position() in snake.positions[1:]:
-                game_over(score)
-                return
-
-            screen.fill(BLACK)
-            snake.render(screen)
-            food.render(screen)
-
-            # Выводим количество очков на экран, рисуем кнопку паузы
-            pygame.draw.rect(screen, WHITE, (570, 5, 5, 25))
-            pygame.draw.rect(screen, WHITE, (583, 5, 5, 25))
-            draw_text(screen, f"Очки: {score}", (10, 10), WHITE)
-
-            pygame.display.flip()
-
-            clock.tick(5)
-
+            handle_events(snake)            
+            if game_flag == 1:
+                snake.update()
+    
+                if snake.get_head_position() == food.position:
+                    snake.size += 1
+                    food.randomize_position()
+                    score += 1
+    
+                # Проверка столкновения головы змейки с телом
+                if snake.get_head_position() in snake.positions[1:]:
+                    game_over(score)
+                    return
+    
+                screen.fill(BLACK)
+                snake.render(screen)
+                food.render(screen)
+    
+                # Выводим количество очков на экран, рисуем кнопку паузы
+                pygame.draw.rect(screen, WHITE, (570, 5, 5, 25))
+                pygame.draw.rect(screen, WHITE, (583, 5, 5, 25))
+                draw_text(screen, f"Очки: {score}", (10, 10), WHITE)
+    
+                pygame.display.flip()
+    
+                clock.tick(5)
+            else:
+                if snake_minus == 1:
+                    print(snake.positions)
+                    snake.positions.pop(0)
+                    snake.positions.pop(0)
+                    snake_minus = 0
 
 # Функции для обработки событий
 def handle_events(snake):
+    global game_flag 
+    global snake_minus
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit()
+            sys.exit()   
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if 550 <= pygame.mouse.get_pos()[0] <= 600 and 0 <= pygame.mouse.get_pos()[1] <= 50 and game_flag == 1:
+                game_flag = 0  
+                snake_minus = 1
+            elif 550 <= pygame.mouse.get_pos()[0] <= 600 and 0 <= pygame.mouse.get_pos()[1] <= 50 and game_flag == 0:
+                game_flag = 1  
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                snake.direction = UP
-            elif event.key == pygame.K_DOWN:
-                snake.direction = DOWN
-            elif event.key == pygame.K_LEFT:
-                snake.direction = LEFT
-            elif event.key == pygame.K_RIGHT:
-                snake.direction = RIGHT
+            if event.key == pygame.K_SPACE and game_flag == 1:
+                game_flag = 0  
+                snake_minus = 1
+            elif event.key == pygame.K_SPACE and game_flag == 0:
+                game_flag = 1      
+            elif game_flag == 1:
+                if event.key == pygame.K_UP:
+                    snake.direction = UP
+                elif event.key == pygame.K_DOWN:
+                    snake.direction = DOWN
+                elif event.key == pygame.K_LEFT:
+                    snake.direction = LEFT
+                elif event.key == pygame.K_RIGHT:
+                    snake.direction = RIGHT     
 
 
 # Функция для вывода сообщения об окончании игры и возврата в главное меню
