@@ -208,13 +208,47 @@ def choose_level():
                     return selected_level
 
 
+def draw_animated_splash_screen():
+    screen.fill(BLACK)
+
+    # Начальные координаты для заголовка "SNAKE"
+    title_x = -300
+    title_y = HEIGHT // 4
+
+    # Анимация выезда заголовка
+    while title_x <= (WIDTH - 300):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        screen.fill(BLACK)
+
+        title_font_1 = pygame.font.SysFont('comicsansms', 72)
+        title_font_2 = pygame.font.SysFont('consolas', 22)        
+        title_text_1 = title_font_1.render("SNAKE", True, WHITE)
+        title_shadow_1 = title_font_1.render("SNAKE", True, (115, 115, 115))
+        screen.blit(title_shadow_1, (title_x + 3, title_y + 3))
+        screen.blit(title_text_1, (title_x, title_y))
+        title_text_2 = title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, WHITE)
+        title_shadow_2 = title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, (115, 115, 115))
+        screen.blit(title_shadow_2, (title_x - 240, title_y + 102))
+        screen.blit(title_text_2, (title_x - 242, title_y  + 100))        
+
+        pygame.display.flip()
+        pygame.time.delay(10)  # Задержка в 10 миллисекунд для создания анимации
+        title_x += 2  # Изменение координаты X
+
+    pygame.time.delay(2000)
+
+
 # Основной игровой цикл
 def main():
     global game_flag
     global snake_minus    
     game_flag = 1
     clock = pygame.time.Clock()
-
+    draw_animated_splash_screen()
     selected_level = choose_level()
 
     if selected_level == 0:
@@ -262,7 +296,6 @@ def main():
                 clock.tick(5)
             else:
                 if snake_minus == 1:
-                    print(snake.positions)
                     snake.positions.pop(0)
                     snake.positions.pop(0)
                     snake_minus = 0
@@ -300,7 +333,6 @@ def main():
                 clock.tick(5)
             else:
                 if snake_minus == 1:
-                    print(snake.positions)
                     snake.positions.pop(0)
                     snake.positions.pop(0)
                     snake_minus = 0
