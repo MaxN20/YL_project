@@ -233,7 +233,7 @@ def draw_animated_splash_screen():
         title_text_2 = title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, WHITE)
         title_shadow_2 = title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, (115, 115, 115))
         screen.blit(title_shadow_2, (title_x - 240, title_y + 102))
-        screen.blit(title_text_2, (title_x - 242, title_y  + 100))        
+        screen.blit(title_text_2, (title_x - 241, title_y  + 101))        
 
         pygame.display.flip()
         pygame.time.delay(10)  # Задержка в 10 миллисекунд для создания анимации
@@ -248,7 +248,6 @@ def main():
     global snake_minus    
     game_flag = 1
     clock = pygame.time.Clock()
-    draw_animated_splash_screen()
     selected_level = choose_level()
 
     if selected_level == 0:
@@ -305,10 +304,9 @@ def main():
         food = Food()
         score = 0
         while True:
-            handle_events(snake)            
+            handle_events(snake)  
             if game_flag == 1:
                 snake.update()
-    
                 if snake.get_head_position() == food.position:
                     snake.size += 1
                     food.randomize_position()
@@ -358,13 +356,13 @@ def handle_events(snake):
             elif event.key == pygame.K_SPACE and game_flag == 0:
                 game_flag = 1      
             elif game_flag == 1:
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP and snake.direction != DOWN:
                     snake.direction = UP
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN and snake.direction != UP:
                     snake.direction = DOWN
-                elif event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_LEFT and snake.direction != RIGHT:
                     snake.direction = LEFT
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT and snake.direction != LEFT:
                     snake.direction = RIGHT     
 
 
@@ -392,4 +390,5 @@ def game_over(score):
     main()
 
 if __name__ == "__main__":
+    draw_animated_splash_screen()
     main()
