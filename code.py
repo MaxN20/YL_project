@@ -28,6 +28,10 @@ pygame.display.set_caption("Змейка")
 # Шрифт для текста
 font = pygame.font.SysFont('monospace', 36)
 
+BACKGROUND_COLOR = (0, 0, 0)
+current_background = 0
+background_info_file = "background_info.txt"
+background_images = ["background1.jpg", "background2.jpg", "background3.jpg"]
 
 # Класс для змейки
 class Snake:
@@ -159,6 +163,49 @@ class Food:
         pygame.draw.rect(surface, self.color, (self.position[0], self.position[1], GRIDSIZE, GRIDSIZE))
 
 
+def choose_background():
+    global current_background
+
+    while True:
+        screen.fill(BLACK)
+        draw_text(screen, "Выберите фон:", (50, 50))
+
+        for i, image_path in enumerate(background_images):
+            color = WHITE if i == current_background else RED
+            draw_text(screen, f"Фон {i + 1}", (50, 100 + i * 50), color)
+
+        draw_text(screen, ">", (30, 100 + current_background * 50), WHITE)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    current_background = (current_background - 1) % len(background_images)
+                elif event.key == pygame.K_DOWN:
+                    current_background = (current_background + 1) % len(background_images)
+                elif event.key == pygame.K_RETURN:
+                    save_background_info(current_background)
+                    return
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if 100 <= pygame.mouse.get_pos()[1] <= 150:
+                    current_background = 0
+                elif 150 <= pygame.mouse.get_pos()[1] <= 200:
+                    current_background = 1
+                elif 200 <= pygame.mouse.get_pos()[1] <= 250:
+                    current_background = 2
+
+def save_background_info(background_index):
+    with open(background_info_file, "w") as file:
+        file.write(str(background_index))
+
+def show_background_menu():
+    global current_background
+    choose_background()
+
 # Отрисовка текста
 def draw_text(surface, text, pos, color=WHITE):
     words = [word.split(' ') for word in text.splitlines()]
@@ -177,6 +224,19 @@ def draw_text(surface, text, pos, color=WHITE):
         x = pos[0]
         y += word_height
 
+def draw_button(surface, text, position, action=None):
+    button_font = pygame.font.SysFont('monospace', 24)
+    button_text = button_font.render(text, True, WHITE)
+    text_rect = button_text.get_rect(center=position)
+
+    pygame.draw.rect(surface, RED, (text_rect.x - 5, text_rect.y - 5, text_rect.width + 10, text_rect.height + 10))
+    surface.blit(button_text, text_rect.topleft)
+
+    mouse_pos = pygame.mouse.get_pos()
+    mouse_click = pygame.mouse.get_pressed()
+
+    if text_rect.collidepoint(mouse_pos) and mouse_click[0] == 1 and action:
+        action()
 
 # Функция для выбора уровня
 def choose_level():
@@ -192,6 +252,8 @@ def choose_level():
             draw_text(screen, level, (50, 100 + i * 50), color)
 
         draw_text(screen, ">", (30, 100 + selected_level * 50), WHITE)
+
+        draw_button(screen, "Выбрать фон", (300, 300), choose_background)
 
         pygame.display.flip()
 
@@ -236,11 +298,10 @@ def draw_animated_splash_screen():
         screen.blit(title_text_2, (title_x - 241, title_y  + 101))        
 
         pygame.display.flip()
-        pygame.time.delay(10)  # Задержка в 10 миллисекунд для создания анимации
+        pygame.time.delay(10)
         title_x += 2  # Изменение координаты X
-
+        
     pygame.time.delay(2000)
-
 
 # Основной игровой цикл
 def main():
@@ -249,7 +310,15 @@ def main():
     game_flag = 1
     clock = pygame.time.Clock()
     selected_level = choose_level()
-
+    
+    background_color = BACKGROUND_COLOR
+    try:
+        with open(background_info_file, "r") as file:
+            current_background = int(file.read())
+            background_color = pygame.image.load(background_images[current_background])
+    except FileNotFoundError:
+        pass      
+    
     if selected_level == 0:
         # Уровень 1
         snake = Snake()
@@ -280,7 +349,7 @@ def main():
                     game_over(score)
                     return
     
-                screen.fill(BLACK)
+                screen.blit(background_color, (0, 0))           
                 snake.render(screen)
                 food.render(screen)
     
@@ -317,7 +386,7 @@ def main():
                     game_over(score)
                     return
     
-                screen.fill(BLACK)
+                screen.blit(background_color, (0, 0))           
                 snake.render(screen)
                 food.render(screen)
     
@@ -392,3 +461,4 @@ def game_over(score):
 if __name__ == "__main__":
     draw_animated_splash_screen()
     main()
+    
