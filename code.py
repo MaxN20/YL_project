@@ -28,10 +28,10 @@ pygame.display.set_caption("Змейка")
 # Шрифт для текста
 font = pygame.font.SysFont('monospace', 36)
 
-BACKGROUND_COLOR = (0, 0, 0)
 current_background = 0
 background_info_file = "background_info.txt"
 background_images = ["background1.jpg", "background2.jpg", "background3.jpg"]
+BACKGROUND_COLOR = background_images[current_background]
 
 # Класс для змейки
 class Snake:
@@ -270,38 +270,125 @@ def choose_level():
                     return selected_level
 
 
+class AnimatedSplashApple:
+    def __init__(self):
+        self.position = (100, HEIGHT // 2)
+        self.color = GREEN
+        self.animation_duration = 3000  # Длительность анимации в миллисекундах
+        self.start_time = pygame.time.get_ticks()
+
+    def update(self):
+        current_time = pygame.time.get_ticks()
+        elapsed_time = current_time - self.start_time
+
+        if elapsed_time >= self.animation_duration:
+            self.position = (random.randint(0, (WIDTH // GRIDSIZE) - 1) * GRIDSIZE,
+                             random.randint(0, (HEIGHT // GRIDSIZE) - 1) * GRIDSIZE)
+            self.start_time = current_time
+
+    def render(self, surface):
+        pygame.draw.rect(surface, self.color, (self.position[0], self.position[1], GRIDSIZE, GRIDSIZE))
+
+
+class AnimatedSplashScreen:
+    def __init__(self):
+        self.snake = AnimatedSplashSnake()
+        self.title_font_1 = pygame.font.SysFont('comicsansms', 72)
+        self.title_font_2 = pygame.font.SysFont('consolas', 22)
+        self.title_x = -270
+        self.title_y = HEIGHT // 4
+        self.animation_duration = 6500  # Длительность анимации в миллисекундах
+        self.start_time = pygame.time.get_ticks()
+
+    def update(self):
+        current_time = pygame.time.get_ticks()
+        elapsed_time = current_time - self.start_time
+
+        if self.title_x <= 300:
+            self.title_x += 3  # Изменение координаты X
+        self.snake.update()
+        
+    def render(self, surface):
+        surface.fill(BLACK)
+        
+        self.snake.render(surface)
+        
+        title_text_1 = self.title_font_1.render("SNAKE", True, WHITE)
+        title_shadow_1 = self.title_font_1.render("SNAKE", True, (115, 115, 115))
+        surface.blit(title_shadow_1, (self.title_x + 3, self.title_y + 3))
+        surface.blit(title_text_1, (self.title_x, self.title_y))
+        
+        title_text_2 = self.title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, WHITE)
+        title_shadow_2 = self.title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, (115, 115, 115))
+        surface.blit(title_shadow_2, (self.title_x - 240, self.title_y + 102))
+        surface.blit(title_text_2, (self.title_x - 241, self.title_y + 101))
+
+# Класс для анимированной змейки на стартовом экране
+class AnimatedSplashSnake:
+    def __init__(self):
+        self.size = 4
+        self.positions = [
+            (40, HEIGHT // 2 + i * GRIDSIZE) for i in range(self.size)
+        ]
+        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        self.color = WHITE
+        self.change_direction_counter = random.randint(3, 6)
+
+    def update(self):
+        self.snake_change_direction()
+
+        cur = self.positions[0]
+        x, y = self.direction
+        new = (((cur[0] + (x * GRIDSIZE)) % WIDTH), (cur[1] + (y * GRIDSIZE)) % HEIGHT)
+        self.positions.insert(0, new)
+        if len(self.positions) > self.size:
+            self.positions.pop()
+
+    def snake_change_direction(self):
+        self.change_direction_counter -= 1
+        if self.change_direction_counter == 0:
+            move = [UP, DOWN, LEFT, RIGHT]   
+            #Изменение направления змейки на любое, кроме противоположного
+            dict_check = (-self.direction[0], -self.direction[1])
+            a = list(filter(lambda x: x != dict_check, move))
+            self.direction = random.choice(a)
+            self.change_direction_counter = random.randint(2, 4)
+
+    def render(self, surface):
+        for p in self.positions:
+            pygame.draw.rect(surface, self.color, (p[0], p[1], GRIDSIZE, GRIDSIZE))
+
+# Дополненная функция для анимации змейки на стартовом экране
 def draw_animated_splash_screen():
-    screen.fill(BLACK)
+    animated_splash_screen = AnimatedSplashScreen()
+    animated_splash_apple = AnimatedSplashApple()
+    clock = pygame.time.Clock()
+    waiting = True
 
-    # Начальные координаты для заголовка "SNAKE"
-    title_x = -300
-    title_y = HEIGHT // 4
-
-    # Анимация выезда заголовка
-    while title_x <= (WIDTH - 300):
+    while waiting == True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                
+        animated_splash_apple.update()
+        animated_splash_screen.update()
 
         screen.fill(BLACK)
-
-        title_font_1 = pygame.font.SysFont('comicsansms', 72)
-        title_font_2 = pygame.font.SysFont('consolas', 22)        
-        title_text_1 = title_font_1.render("SNAKE", True, WHITE)
-        title_shadow_1 = title_font_1.render("SNAKE", True, (115, 115, 115))
-        screen.blit(title_shadow_1, (title_x + 3, title_y + 3))
-        screen.blit(title_text_1, (title_x, title_y))
-        title_text_2 = title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, WHITE)
-        title_shadow_2 = title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, (115, 115, 115))
-        screen.blit(title_shadow_2, (title_x - 240, title_y + 102))
-        screen.blit(title_text_2, (title_x - 241, title_y  + 101))        
+        animated_splash_screen.render(screen)
+        animated_splash_apple.render(screen)
 
         pygame.display.flip()
-        pygame.time.delay(10)
-        title_x += 2  # Изменение координаты X
-        
-    pygame.time.delay(2000)
+        clock.tick(30)  # Увеличено количество кадров в секунду
+
+        # Ожидание нажатия Enter
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    waiting = False
 
 # Основной игровой цикл
 def main():
@@ -461,4 +548,3 @@ def game_over(score):
 if __name__ == "__main__":
     draw_animated_splash_screen()
     main()
-    
