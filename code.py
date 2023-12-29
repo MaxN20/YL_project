@@ -33,6 +33,8 @@ background_info_file = "background_info.txt"
 background_images = ["background1.jpg", "background2.jpg", "background3.jpg"]
 BACKGROUND_COLOR = background_images[current_background]
 
+APPLE_IMAGE = [pygame.image.load("apple.png"), pygame.image.load("apple2.png")]
+
 # Класс для змейки
 class Snake:
     def __init__(self):
@@ -152,15 +154,33 @@ class Snake:
 class Food:
     def __init__(self):
         self.position = (0, 0)
-        self.color = GREEN
+        self.image = random.choice(APPLE_IMAGE)
         self.randomize_position()
+        self.glow_counter = 0 # Начальное свечение
+        self.max_glow_counter = 3
+        self.glow_radius = 15  # Радиус свечения
+        self.glow_color = (255, 255, 0, 200)
 
     def randomize_position(self):
+        self.image = random.choice(APPLE_IMAGE)
         self.position = (random.randint(0, (WIDTH // GRIDSIZE) - 1) * GRIDSIZE,
                          random.randint(0, (HEIGHT // GRIDSIZE) - 1) * GRIDSIZE)
 
+    def update(self):
+        # Обновление счетчика свечения
+        self.glow_counter = (self.glow_counter + 1) % (2 * self.max_glow_counter)
+
     def render(self, surface):
-        pygame.draw.rect(surface, self.color, (self.position[0], self.position[1], GRIDSIZE, GRIDSIZE))
+        # Созддание круга для обозначения яблока
+        glow_surface = pygame.Surface((self.glow_radius * 2, self.glow_radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(glow_surface, self.glow_color, (self.glow_radius, self.glow_radius), self.glow_radius)
+
+        # Эффект мерцания
+        alpha = abs(self.glow_counter - self.max_glow_counter) / self.max_glow_counter * 255
+        glow_surface.set_alpha(alpha)
+
+        surface.blit(glow_surface, (self.position[0] - self.glow_radius + 10, self.position[1] - self.glow_radius + 10))
+        surface.blit(self.image, (self.position[0], self.position[1]))
 
 
 def choose_background():
@@ -274,7 +294,7 @@ class AnimatedSplashApple:
     def __init__(self):
         self.position = (100, HEIGHT // 2)
         self.color = GREEN
-        self.animation_duration = 3000  # Длительность анимации в миллисекундах
+        self.animation_duration = 1  # Длительность анимации в миллисекундах
         self.start_time = pygame.time.get_ticks()
 
     def update(self):
@@ -304,7 +324,7 @@ class AnimatedSplashScreen:
         current_time = pygame.time.get_ticks()
         elapsed_time = current_time - self.start_time
 
-        if self.title_x <= 300:
+        if self.title_x <= 340:
             self.title_x += 3  # Изменение координаты X
         self.snake.update()
         
@@ -318,10 +338,10 @@ class AnimatedSplashScreen:
         surface.blit(title_shadow_1, (self.title_x + 3, self.title_y + 3))
         surface.blit(title_text_1, (self.title_x, self.title_y))
         
-        title_text_2 = self.title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, WHITE)
-        title_shadow_2 = self.title_font_2.render("Made by Maxim Nenashev & Darina Zelenkova", True, (115, 115, 115))
-        surface.blit(title_shadow_2, (self.title_x - 240, self.title_y + 102))
-        surface.blit(title_text_2, (self.title_x - 241, self.title_y + 101))
+        title_text_2 = self.title_font_2.render("Created by Maxim Nenashev & Darina Zelenkova", True, WHITE)
+        title_shadow_2 = self.title_font_2.render("Created by Maxim Nenashev & Darina Zelenkova", True, (115, 115, 115))
+        surface.blit(title_shadow_2, (self.title_x - 280, self.title_y + 102))
+        surface.blit(title_text_2, (self.title_x - 281, self.title_y + 101))
 
 # Класс для анимированной змейки на стартовом экране
 class AnimatedSplashSnake:
@@ -362,6 +382,8 @@ class AnimatedSplashSnake:
 def draw_animated_splash_screen():
     animated_splash_screen = AnimatedSplashScreen()
     animated_splash_apple = AnimatedSplashApple()
+    animated_splash_apple2 = AnimatedSplashApple()
+    animated_splash_apple3 = AnimatedSplashApple()
     clock = pygame.time.Clock()
     waiting = True
 
@@ -372,11 +394,15 @@ def draw_animated_splash_screen():
                 sys.exit()
                 
         animated_splash_apple.update()
+        animated_splash_apple2.update()
+        animated_splash_apple3.update()
         animated_splash_screen.update()
 
         screen.fill(BLACK)
         animated_splash_screen.render(screen)
         animated_splash_apple.render(screen)
+        animated_splash_apple2.render(screen)
+        animated_splash_apple3.render(screen)
 
         pygame.display.flip()
         clock.tick(30)  # Увеличено количество кадров в секунду
@@ -415,7 +441,8 @@ def main():
             handle_events(snake)            
             if game_flag == 1:
                 snake.update()
-    
+                food.update()
+                food.render(screen)    
                 if snake.get_head_position() == food.position:
                     snake.size += 1
                     food.randomize_position()
@@ -454,6 +481,8 @@ def main():
                     snake.positions.pop(0)
                     snake.positions.pop(0)
                     snake_minus = 0
+                if not game_flag:
+                    food.update()                
     elif selected_level == 1:
         # Уровень 2
         snake = Snake()
@@ -463,6 +492,8 @@ def main():
             handle_events(snake)  
             if game_flag == 1:
                 snake.update()
+                food.update()
+                food.render(screen)                 
                 if snake.get_head_position() == food.position:
                     snake.size += 1
                     food.randomize_position()
@@ -490,6 +521,8 @@ def main():
                     snake.positions.pop(0)
                     snake.positions.pop(0)
                     snake_minus = 0
+                if not game_flag:
+                    food.update()                 
 
 # Функции для обработки событий
 def handle_events(snake):
