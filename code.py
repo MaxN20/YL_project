@@ -35,6 +35,7 @@ BACKGROUND_COLOR = background_images[current_background]
 
 APPLE_IMAGE = [pygame.image.load("apple.png"), pygame.image.load("apple2.png")]
 
+speed_snake = 5
 # Класс для змейки
 class Snake:
     def __init__(self):
@@ -44,7 +45,8 @@ class Snake:
         ]
         self.direction = UP  # Изначальное направление вверх
         self.color = WHITE
-
+        self.speed = 5
+            
     def get_head_position(self):
         return self.positions[0]
 
@@ -260,6 +262,7 @@ def draw_button(surface, text, position, action=None):
 
 # Функция для выбора уровня
 def choose_level():
+    global speed_snake
     levels = ["Уровень 1", "Уровень 2"]
     selected_level = 0
 
@@ -287,6 +290,8 @@ def choose_level():
                 elif event.key == pygame.K_DOWN:
                     selected_level = (selected_level + 1) % len(levels)
                 elif event.key == pygame.K_RETURN:
+                    selected_speed = settings_menu()
+                    speed_snake = selected_speed 
                     return selected_level
 
 
@@ -317,7 +322,6 @@ class AnimatedSplashScreen:
         self.title_font_2 = pygame.font.SysFont('consolas', 22)
         self.title_x = -270
         self.title_y = HEIGHT // 4
-        self.animation_duration = 6500  # Длительность анимации в миллисекундах
         self.start_time = pygame.time.get_ticks()
 
     def update(self):
@@ -405,9 +409,8 @@ def draw_animated_splash_screen():
         animated_splash_apple3.render(screen)
 
         pygame.display.flip()
-        clock.tick(30)  # Увеличено количество кадров в секунду
+        clock.tick(30)
 
-        # Ожидание нажатия Enter
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -415,6 +418,43 @@ def draw_animated_splash_screen():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     waiting = False
+
+
+def draw_slider(screen, x, y, value, min_value, max_value, step):
+    pygame.draw.rect(screen, WHITE, (x, y, 200, 20), 2)
+    slider_pos = int((value - min_value) / (max_value - min_value) * 200)
+    pygame.draw.rect(screen, RED, (x + slider_pos - 5, y - 5, 10, 30))
+
+def settings_menu(initial_speed=5):
+    selected_speed = initial_speed
+
+    while True:
+        screen.fill(BLACK)
+        draw_text(screen, "Настройки", (50, 50), RED)
+
+        # Отрисовка скорости (ползунок)
+        draw_text(screen, f"Текущая скорость: {selected_speed}", (50, 100), WHITE)  # Вывод скорости
+        draw_text(screen, "Выберите скорость:", (50, 150), WHITE)
+        draw_slider(screen, 50, 200, selected_speed, 1, 10, 1)
+
+        draw_text(screen, "Enter - начать игру", (50, 350), WHITE)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    selected_speed = max(1, selected_speed - 1)
+                elif event.key == pygame.K_RIGHT:
+                    selected_speed = min(10, selected_speed + 1)
+                elif event.key == pygame.K_RETURN:
+                    return selected_speed
+
+        pygame.time.delay(50)
+
 
 # Основной игровой цикл
 def main():
@@ -475,7 +515,7 @@ def main():
     
                 pygame.display.flip()
     
-                clock.tick(5)
+                clock.tick(speed_snake * 5)
             else:
                 if snake_minus == 1:
                     snake.positions.pop(0)
@@ -515,7 +555,7 @@ def main():
     
                 pygame.display.flip()
     
-                clock.tick(5)
+                clock.tick(speed_snake * 5)
             else:
                 if snake_minus == 1:
                     snake.positions.pop(0)
