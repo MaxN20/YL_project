@@ -299,7 +299,7 @@ class AnimatedSplashApple:
     def __init__(self):
         self.position = (100, HEIGHT // 2)
         self.color = GREEN
-        self.animation_duration = 1  # Длительность анимации в миллисекундах
+        self.animation_duration = 1  # Длительность анимации
         self.start_time = pygame.time.get_ticks()
 
     def update(self):
@@ -372,7 +372,7 @@ class AnimatedSplashSnake:
         self.change_direction_counter -= 1
         if self.change_direction_counter == 0:
             move = [UP, DOWN, LEFT, RIGHT]   
-            #Изменение направления змейки на любое, кроме противоположного
+            # Изменение направления змейки на любое, кроме противоположного
             dict_check = (-self.direction[0], -self.direction[1])
             a = list(filter(lambda x: x != dict_check, move))
             self.direction = random.choice(a)
@@ -382,7 +382,7 @@ class AnimatedSplashSnake:
         for p in self.positions:
             pygame.draw.rect(surface, self.color, (p[0], p[1], GRIDSIZE, GRIDSIZE))
 
-# Дополненная функция для анимации змейки на стартовом экране
+# Функция для анимации змейки на стартовом экране
 def draw_animated_splash_screen():
     animated_splash_screen = AnimatedSplashScreen()
     animated_splash_apple = AnimatedSplashApple()
@@ -515,7 +515,7 @@ def main():
     
                 pygame.display.flip()
     
-                clock.tick(speed_snake * 5)
+                clock.tick(speed_snake * 4)
             else:
                 if snake_minus == 1:
                     snake.positions.pop(0)
@@ -555,7 +555,7 @@ def main():
     
                 pygame.display.flip()
     
-                clock.tick(speed_snake * 5)
+                clock.tick(speed_snake * 4)
             else:
                 if snake_minus == 1:
                     snake.positions.pop(0)
