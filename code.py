@@ -1,4 +1,5 @@
 import pygame
+import pygame as pg
 import sys
 import random
 import math
@@ -28,6 +29,8 @@ pygame.display.set_caption("Змейка")
 # Шрифт для текста
 font = pygame.font.SysFont('monospace', 36)
 
+pause_flag = 0
+
 current_background = 0
 background_info_file = "background_info.txt"
 background_images = ["background1.jpg", "background2.jpg", "background3.jpg"]
@@ -36,6 +39,12 @@ BACKGROUND_COLOR = background_images[current_background]
 APPLE_IMAGE = [pygame.image.load("apple.png"), pygame.image.load("apple2.png")]
 
 speed_snake = 5
+
+sound1 = pg.mixer.Sound('bell.wav')
+sound2 = pg.mixer.Sound('gameover.wav')
+sound3 = pg.mixer.Sound('choice.wav')
+pg.mixer.music.load('main.ogg')
+
 # Класс для змейки
 class Snake:
     def __init__(self):
@@ -187,14 +196,14 @@ class Food:
 
 def choose_background():
     global current_background
-
+    backgrounds_list = ['Камень', 'Трава', 'Грунт']
     while True:
         screen.fill(BLACK)
         draw_text(screen, "Выберите фон:", (50, 50))
 
         for i, image_path in enumerate(background_images):
             color = WHITE if i == current_background else RED
-            draw_text(screen, f"Фон {i + 1}", (50, 100 + i * 50), color)
+            draw_text(screen, backgrounds_list[i], (50, 100 + i * 50), color)
 
         draw_text(screen, ">", (30, 100 + current_background * 50), WHITE)
 
@@ -210,14 +219,18 @@ def choose_background():
                 elif event.key == pygame.K_DOWN:
                     current_background = (current_background + 1) % len(background_images)
                 elif event.key == pygame.K_RETURN:
+                    sound3.play()
                     save_background_info(current_background)
                     return
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if 100 <= pygame.mouse.get_pos()[1] <= 150:
+                    sound3.play()
                     current_background = 0
                 elif 150 <= pygame.mouse.get_pos()[1] <= 200:
+                    sound3.play()
                     current_background = 1
                 elif 200 <= pygame.mouse.get_pos()[1] <= 250:
+                    sound3.play()
                     current_background = 2
 
 def save_background_info(background_index):
@@ -263,7 +276,7 @@ def draw_button(surface, text, position, action=None):
 # Функция для выбора уровня
 def choose_level():
     global speed_snake
-    levels = ["Уровень 1", "Уровень 2"]
+    levels = ["Уровень 1(с границами)", "Уровень 2(без границ)"]
     selected_level = 0
 
     while True:
@@ -290,6 +303,7 @@ def choose_level():
                 elif event.key == pygame.K_DOWN:
                     selected_level = (selected_level + 1) % len(levels)
                 elif event.key == pygame.K_RETURN:
+                    sound3.play()
                     selected_speed = settings_menu()
                     speed_snake = selected_speed 
                     return selected_level
@@ -417,6 +431,7 @@ def draw_animated_splash_screen():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+                    sound3.play()
                     waiting = False
 
 
@@ -451,6 +466,7 @@ def settings_menu(initial_speed=5):
                 elif event.key == pygame.K_RIGHT:
                     selected_speed = min(10, selected_speed + 1)
                 elif event.key == pygame.K_RETURN:
+                    sound3.play()
                     return selected_speed
 
         pygame.time.delay(50)
@@ -473,6 +489,7 @@ def main():
         pass      
     
     if selected_level == 0:
+        pg.mixer.music.play()
         # Уровень 1
         snake = Snake()
         food = Food()
@@ -484,6 +501,7 @@ def main():
                 food.update()
                 food.render(screen)    
                 if snake.get_head_position() == food.position:
+                    sound1.play()
                     snake.size += 1
                     food.randomize_position()
                     score += 1
@@ -524,6 +542,7 @@ def main():
                 if not game_flag:
                     food.update()                
     elif selected_level == 1:
+        pg.mixer.music.play()
         # Уровень 2
         snake = Snake()
         food = Food()
@@ -535,6 +554,7 @@ def main():
                 food.update()
                 food.render(screen)                 
                 if snake.get_head_position() == food.position:
+                    sound1.play()
                     snake.size += 1
                     food.randomize_position()
                     score += 1
@@ -566,24 +586,39 @@ def main():
 
 # Функции для обработки событий
 def handle_events(snake):
+    global pause_flag
     global game_flag 
     global snake_minus
+    if not pg.mixer.music.get_busy() and pause_flag == 0: # Проверка что музыка не завершилась
+        pg.mixer.music.play()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()   
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if 550 <= pygame.mouse.get_pos()[0] <= 600 and 0 <= pygame.mouse.get_pos()[1] <= 50 and game_flag == 1:
+                sound3.play()
+                pg.mixer.music.pause()
                 game_flag = 0  
                 snake_minus = 1
+                pause_flag = 1
             elif 550 <= pygame.mouse.get_pos()[0] <= 600 and 0 <= pygame.mouse.get_pos()[1] <= 50 and game_flag == 0:
+                sound3.play()
                 game_flag = 1  
+                pause_flag = 0
+                pg.mixer.music.unpause()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and game_flag == 1:
+                sound3.play()
+                pg.mixer.music.pause()
                 game_flag = 0  
                 snake_minus = 1
+                pause_flag = 1
             elif event.key == pygame.K_SPACE and game_flag == 0:
-                game_flag = 1      
+                sound3.play()
+                game_flag = 1 
+                pg.mixer.music.unpause()
+                pause_flag = 0
             elif game_flag == 1:
                 if event.key == pygame.K_UP and snake.direction != DOWN:
                     snake.direction = UP
@@ -597,6 +632,8 @@ def handle_events(snake):
 
 # Функция для вывода сообщения об окончании игры и возврата в главное меню
 def game_over(score):
+    pg.mixer.music.stop()
+    sound2.play()
     waiting = True
     while waiting:
         screen.fill(BLACK)
@@ -611,6 +648,7 @@ def game_over(score):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+                    sound3.play()
                     waiting = False
 
         pygame.time.delay(100)  # Задержка
