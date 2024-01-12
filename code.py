@@ -8,7 +8,6 @@ import math
 pygame.init()
 
 # Цвета
-BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -36,6 +35,9 @@ background_info_file = "background_info.txt"
 background_images = ["background1.jpg", "background2.jpg", "background3.jpg"]
 BACKGROUND_COLOR = background_images[current_background]
 
+fon = pygame.image.load("fon.png")
+start_fon = pygame.image.load("start_fon.png")
+
 APPLE_IMAGE = [pygame.image.load("apple.png"), pygame.image.load("apple2.png")]
 
 speed_snake = 5
@@ -43,7 +45,6 @@ speed_snake = 5
 sound1 = pg.mixer.Sound('bell.wav')
 sound2 = pg.mixer.Sound('gameover.wav')
 sound3 = pg.mixer.Sound('choice.wav')
-pg.mixer.music.load('main.ogg')
 
 # Класс для змейки
 class Snake:
@@ -198,7 +199,7 @@ def choose_background():
     global current_background
     backgrounds_list = ['Камень', 'Трава', 'Грунт']
     while True:
-        screen.fill(BLACK)
+        screen.blit(fon, (0, 0)) 
         draw_text(screen, "Выберите фон:", (50, 50))
 
         for i, image_path in enumerate(background_images):
@@ -280,7 +281,7 @@ def choose_level():
     selected_level = 0
 
     while True:
-        screen.fill(BLACK)
+        screen.blit(fon, (0, 0)) 
         draw_text(screen, "Выберите уровень:", (50, 50))
 
         for i, level in enumerate(levels):
@@ -347,7 +348,7 @@ class AnimatedSplashScreen:
         self.snake.update()
         
     def render(self, surface):
-        surface.fill(BLACK)
+        screen.blit(start_fon, (0, 0)) 
         
         self.snake.render(surface)
         
@@ -364,7 +365,7 @@ class AnimatedSplashScreen:
 # Класс для анимированной змейки на стартовом экране
 class AnimatedSplashSnake:
     def __init__(self):
-        self.size = 4
+        self.size = 7
         self.positions = [
             (40, HEIGHT // 2 + i * GRIDSIZE) for i in range(self.size)
         ]
@@ -416,7 +417,7 @@ def draw_animated_splash_screen():
         animated_splash_apple3.update()
         animated_splash_screen.update()
 
-        screen.fill(BLACK)
+        screen.blit(fon, (0, 0)) 
         animated_splash_screen.render(screen)
         animated_splash_apple.render(screen)
         animated_splash_apple2.render(screen)
@@ -444,7 +445,7 @@ def settings_menu(initial_speed=5):
     selected_speed = initial_speed
 
     while True:
-        screen.fill(BLACK)
+        screen.blit(fon, (0, 0)) 
         draw_text(screen, "Настройки", (50, 50), RED)
 
         # Отрисовка скорости (ползунок)
@@ -467,6 +468,10 @@ def settings_menu(initial_speed=5):
                     selected_speed = min(10, selected_speed + 1)
                 elif event.key == pygame.K_RETURN:
                     sound3.play()
+                    if selected_speed >= 8:
+                        pg.mixer.music.load('hard.ogg')
+                    else:
+                        pg.mixer.music.load('main.ogg')                        
                     return selected_speed
 
         pygame.time.delay(50)
@@ -636,7 +641,7 @@ def game_over(score):
     sound2.play()
     waiting = True
     while waiting:
-        screen.fill(BLACK)
+        screen.blit(fon, (0, 0)) 
         draw_text(screen, "Игра окончена!", (50, 50), RED)
         draw_text(screen, f"Очки: {score}", (50, 100), WHITE)
         draw_text(screen, "Нажмите Enter, чтобы вернуться в главное меню", (50, 150))
