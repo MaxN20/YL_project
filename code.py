@@ -24,6 +24,7 @@ RIGHT = (1, 0)
 # Инициализация окна
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Змейка")
+pygame.display.set_icon(pygame.image.load("icon.png"))
 
 # Шрифт для текста
 font = pygame.font.SysFont('monospace', 36)
@@ -45,6 +46,11 @@ speed_snake = 5
 sound1 = pg.mixer.Sound('bell.wav')
 sound2 = pg.mixer.Sound('gameover.wav')
 sound3 = pg.mixer.Sound('choice.wav')
+
+exit = pygame.image.load("exit.png")
+exit_button = exit.get_rect(topleft=(498, -12))
+
+dead_flag = 0
 
 # Класс для змейки
 class Snake:
@@ -480,7 +486,9 @@ def settings_menu(initial_speed=5):
 # Основной игровой цикл
 def main():
     global game_flag
-    global snake_minus    
+    global snake_minus 
+    global dead_flag
+    dead_flag = 0
     game_flag = 1
     clock = pygame.time.Clock()
     selected_level = choose_level()
@@ -500,8 +508,11 @@ def main():
         food = Food()
         score = 0
         while True:
-            handle_events(snake)            
-            if game_flag == 1:
+            handle_events(snake)   
+            if dead_flag == 1:
+                game_over(score)
+                return             
+            elif game_flag == 1:
                 snake.update()
                 food.update()
                 food.render(screen)    
@@ -535,7 +546,8 @@ def main():
                 pygame.draw.rect(screen, WHITE, (570, 5, 5, 25))
                 pygame.draw.rect(screen, WHITE, (583, 5, 5, 25))
                 draw_text(screen, f"Очки: {score}", (10, 10), WHITE)
-    
+                
+                screen.blit(exit, exit_button)
                 pygame.display.flip()
     
                 clock.tick(speed_snake * 4)
@@ -554,7 +566,10 @@ def main():
         score = 0
         while True:
             handle_events(snake)  
-            if game_flag == 1:
+            if dead_flag == 1:
+                game_over(score)
+                return                
+            elif game_flag == 1:
                 snake.update()
                 food.update()
                 food.render(screen)                 
@@ -577,7 +592,8 @@ def main():
                 pygame.draw.rect(screen, WHITE, (570, 5, 5, 25))
                 pygame.draw.rect(screen, WHITE, (583, 5, 5, 25))
                 draw_text(screen, f"Очки: {score}", (10, 10), WHITE)
-    
+                
+                screen.blit(exit, exit_button)    
                 pygame.display.flip()
     
                 clock.tick(speed_snake * 4)
@@ -594,20 +610,23 @@ def handle_events(snake):
     global pause_flag
     global game_flag 
     global snake_minus
+    global dead_flag
     if not pg.mixer.music.get_busy() and pause_flag == 0: # Проверка что музыка не завершилась
         pg.mixer.music.play()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit()   
+            sys.exit()          
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if 550 <= pygame.mouse.get_pos()[0] <= 600 and 0 <= pygame.mouse.get_pos()[1] <= 50 and game_flag == 1:
+            if 500 <= pygame.mouse.get_pos()[0] <= 555 and 0 <= pygame.mouse.get_pos()[1] <= 50:
+                dead_flag = 1             
+            elif 555 < pygame.mouse.get_pos()[0] <= 600 and 0 <= pygame.mouse.get_pos()[1] <= 50 and game_flag == 1:
                 sound3.play()
                 pg.mixer.music.pause()
                 game_flag = 0  
                 snake_minus = 1
                 pause_flag = 1
-            elif 550 <= pygame.mouse.get_pos()[0] <= 600 and 0 <= pygame.mouse.get_pos()[1] <= 50 and game_flag == 0:
+            elif 555 < pygame.mouse.get_pos()[0] <= 600 and 0 <= pygame.mouse.get_pos()[1] <= 50 and game_flag == 0:
                 sound3.play()
                 game_flag = 1  
                 pause_flag = 0
