@@ -499,7 +499,7 @@ def main():
             current_background = int(file.read())
             background_color = pygame.image.load(background_images[current_background])
     except FileNotFoundError:
-        pass      
+        pass
     
     if selected_level == 0:
         pg.mixer.music.play()
@@ -537,7 +537,7 @@ def main():
                     game_over(score)
                     return
     
-                screen.blit(background_color, (0, 0))           
+                screen.blit(background_color, (0, 0))
                 snake.render(screen)
                 food.render(screen)
     
@@ -584,7 +584,7 @@ def main():
                     game_over(score)
                     return
     
-                screen.blit(background_color, (0, 0))           
+                screen.blit(background_color, (0, 0))
                 snake.render(screen)
                 food.render(screen)
     
